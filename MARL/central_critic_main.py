@@ -17,7 +17,7 @@ n_actions = 9
 capacity = 520
 batch_size = 520
 n_states = n_agents * 3 + 81
-# 假设状态信息包括每个UAV自身的信息（位置的x y坐标、剩余的电量、整个格子区间的81中状态）
+
 
 n_episode = 30000
 max_steps = 40
@@ -28,11 +28,6 @@ maddpg = MADDPG(n_agents, n_states, n_observations, n_actions, batch_size, capac
 
 FloatTensor = th.cuda.FloatTensor if maddpg.use_cuda else th.FloatTensor
 
-'''
-画图像需要包括：
-各个agent的actor图像 
-central critic loss图像
-'''
 
 def __main__():
     FloatTensor = th.cuda.FloatTensor if maddpg.use_cuda else th.FloatTensor
@@ -89,9 +84,7 @@ def __main__():
             curr_obs = th.from_numpy(curr_obs).float()
             curr_obs = curr_obs.type(FloatTensor)
             curr_actions = maddpg.select_action(curr_obs)
-            # print("生成的动作为：", curr_actions)
-            # print("对应的tensor.shape为：", curr_actions.shape)
-            # 得到计算Q值所需要的s_t的状态信息，假设状态信息包括每个UAV自身的信息（位置的x y坐标、剩余的电量、整个格子区间的81中状态）
+
             s_t = curr_state.get_states()
             # print("s_t的类型", s_t)
             s_t = th.from_numpy(s_t)
@@ -108,33 +101,17 @@ def __main__():
                     first_state_j = np.row_stack((first_state_j, first_state_jj))
             first_state_j = th.from_numpy(first_state_j).float()
             next_state, curr_reward, times = curr_state.central_update_state(curr_actions, n_agents)
-            # print("环境变化得到的结果为：", curr_reward, times)
+
             sum_reward = sum_reward + curr_reward
-            # print("返回本时间片的total_reward为：", curr_reward)
-            # print("返回本时间片的sum_times为：", times)
+
             sum_time = sum_time + times
             curr_state = next_state
             s_t_2 = curr_state.get_states()
             s_t_2 = th.from_numpy(s_t_2)
-            # actions_statistic = statistics(curr_actions)
-            # print("整理出的统计动作数据为：", actions_statistic)
-            # print("对应的shape为:", actions_statistic.shape)
+
             maddpg.bufferC.push(s_t, first_state_j, s_t_2, curr_actions, curr_reward)
             # maddpg.memory.push(s_t, curr_actions, s_t_2, curr_reward)
-            '''
-            计算critic网络的Q值：Q(s_t, a_t)
-            s_t 采用从状态中获得的方式，a_t采用统计的方式，这样可以解决在计算A的时候的输入纬度不同的问题
-            '''
-
-            # a_t = statistics(curr_actions)
-            # # 计算得到Q值
-            # s_t = th.from_numpy(s_t).float()
-            # s_t = s_t.cuda()
-            # a_t = a_t.cuda()
-            # # print("打印输入到critic网络的两个部分的shape", s_t, a_t)
-            # with th.no_grad():
-            #     q_value = maddpg.critics(s_t, a_t)
-
+           
             '''
             第四步：存（Q,R）在buffer U 中
             '''

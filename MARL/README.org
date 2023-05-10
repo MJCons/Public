@@ -1,6 +1,4 @@
 Dependency
 
 - [[https://github.com/pytorch/pytorch][pytorch]]
-- [[https://github.com/facebookresearch/visdom][visdom]]
 - =python==3.6.1= (recommend using the anaconda/miniconda)
-- if you need to render the environments, =opencv= is required
