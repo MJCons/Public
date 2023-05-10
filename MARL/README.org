@@ -1,0 +1,4 @@
+Dependency
+
+- [[https://github.com/pytorch/pytorch][pytorch]]
+- =python==3.6.1= (recommend using the anaconda/miniconda)
